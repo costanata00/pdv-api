@@ -25,6 +25,8 @@ Authorization: Bearer <token retornado no login>
 
 a fazer
 
-service de venda
 permissões/cargos
-filtragem em query
+
+trocar o destroy por update({ ativo: false })
+
+include no listar vendas
