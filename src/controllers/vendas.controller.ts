@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { Op, WhereOptions } from 'sequelize';
 import { vendas } from '../models';
 import { parseId, pick } from '../utils/http';
 import { VendaError, vendasService } from '../services/vendas.service';
@@ -6,8 +7,32 @@ import { VendaError, vendasService } from '../services/vendas.service';
 const campos = ['cliente_id', 'usuario_id', 'valor_total', 'data_venda', 'status', 'pago', 'forma_pag'] as const;
 
 export const vendasController = {
-  async index(_req: Request, res: Response) {
-    res.json(await vendas.findAll({ order: [['id', 'ASC']] }));
+  async index(req: Request, res: Response) {
+    const busca = typeof req.query.busca === 'string' ? req.query.busca.trim() : '';
+
+    const where: WhereOptions = {};
+    if (busca) {
+      Object.assign(where, {
+        [Op.or]: [
+          { '$cliente.nome$': { [Op.iLike]: `%${busca}%` } },
+          { '$usuario.nome$': { [Op.iLike]: `%${busca}%` } },
+        ],
+      });
+    }
+    //if (status) Object.assign(where, { status });
+    //if (pago === 'true' || pago === 'false') Object.assign(where, { pago: pago === 'true' });
+
+    res.json(
+      await vendas.findAll({
+        where,
+        include: [
+          { association: 'cliente', attributes: ['nome'] },
+          { association: 'usuario', attributes: ['nome'] },
+          
+        ],
+        order: [['id', 'ASC']],
+      }),
+    );
   },
 
   async show(req: Request, res: Response) {
@@ -27,9 +52,7 @@ export const vendasController = {
     res.json(venda);
   },
 
-  // Venda completa: valida, confere estoque, calcula valores, grava venda + itens
-  // e baixa o estoque numa unica transacao (ver services/vendas.service.ts).
-  // Body: { cliente_id?, forma_pag?, pago?, itens: [{ mercadoria_id, quantidade }] }
+
   async store(req: Request, res: Response) {
     try {
       const venda = await vendasService.criar(req.body, req.usuario!.id);
@@ -65,7 +88,17 @@ export const vendasController = {
     }
     res.status(204).end();
   },
-
-
-  
+  async cancel(req: Request, res: Response) {
+    const id = parseId(req, res);
+    if (id === null) return;
+    try {
+      await vendasService.cancelarVenda(id);
+      res.status(204).end();
+    } catch (err) {
+      if (err instanceof VendaError) {
+        console.log(res.status(err.status).json({ error: err.message }));
+        return;
+      }
+    }
+  }
 };

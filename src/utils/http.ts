@@ -16,14 +16,12 @@ declare global {
   }
 }
 
-// Retorna a chave secreta usada para verificar tokens JWT
 function jwtSecret(): string {
   const secret = process.env.JWT_SECRET;
   if (!secret) throw new Error('JWT_SECRET nao definida');
   return secret;
 }
 
-//cria um token JWT com validade de 8h
 export function gerarToken(payload: TokenPayload): string {
   return jwt.sign(payload, jwtSecret(), { expiresIn: '8h' });
 }

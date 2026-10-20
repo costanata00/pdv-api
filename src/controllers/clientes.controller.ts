@@ -6,8 +6,7 @@ import { parseId, pick } from '../utils/http';
 const campos = ['nome', 'cpf_cnpj', 'telefone', 'email', 'ativo'] as const;
 
 export const clientesController = {
-  // GET /clientes?busca=ana -> filtra por nome, CPF/CNPJ, telefone ou email (sem diferenciar maiusculas).
-  // Sem busca (ou busca vazia) lista todos.
+
   async index(req: Request, res: Response) {
     const busca = typeof req.query.busca === 'string' ? req.query.busca.trim() : '';
     const where = busca

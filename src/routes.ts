@@ -5,6 +5,7 @@ import { clientesController } from './controllers/clientes.controller';
 import { vendasController } from './controllers/vendas.controller';
 import { itensVendaController } from './controllers/itens-venda.controller';
 import { autenticar } from './utils/http';
+import { vendasService } from './services/vendas.service';
 
 const routes = Router();
 
@@ -33,11 +34,17 @@ routes.put('/clientes/:id', clientesController.update);
 
 //routes.delete('/clientes/:id', clientesController.destroy); //sai
 
+
 routes.get('/vendas', vendasController.index); 
 routes.get('/vendas/:id', vendasController.show);
-routes.post('/vendas', vendasController.store);
-routes.put('/vendas/:id', vendasController.update); //fica pra pagar
-//routes.delete('/vendas/:id', vendasController.destroy); //sai???
+routes.post('/vendas', vendasController.store); //encaminha p service
+
+
+
+//routes.post('/vendas', vendasController.store);//service cuida
+routes.put('/vendas/:id', vendasController.update);
+routes.put('/vendas/:id/cancelar', vendasController.cancel); //fica pra cancelar
+
 
 routes.get('/vendas/:id/itens', itensVendaController.indexByVenda);
 routes.get('/itens-venda/:id', itensVendaController.show);

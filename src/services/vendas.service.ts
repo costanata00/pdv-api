@@ -141,4 +141,25 @@ export const vendasService = {
       ],
     });
   },
+  async cancelarVenda(vendaId: number) {
+    await sequelize.transaction(async (transaction) => {
+      const venda = await vendas.findByPk(vendaId, {
+        include: [{ association: 'itens_vendas', include: [{ association: 'mercadorium' }] }],
+        // trava so a linha da venda (Postgres nao aceita FOR UPDATE no lado nulo do LEFT JOIN)
+        lock: { level: transaction.LOCK.UPDATE, of: vendas },
+        transaction,
+      });
+      if (!venda) throw new VendaError('Venda nao encontrada', 404);
+      if (venda.status === 'cancelada') throw new VendaError('Venda ja cancelada', 409);
+
+      // atualiza o estoque
+      for (const item of venda.itens_vendas) {
+        await item.mercadorium.increment('estoque', { by: item.quantidade, transaction });
+      }
+
+      // marca a venda como cancelada
+      await venda.update({ status: 'cancelada' }, { transaction });
+    });
+  }
+
 };
