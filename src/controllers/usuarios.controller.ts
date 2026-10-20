@@ -82,5 +82,9 @@ export const usuariosController = {
     });
     
   },
+  async refresh(req: Request, res: Response) {
+    const { id, email } = req.usuario!;
+    res.json({ token: gerarToken({ id, email }, 7400) });
+  },
 
 };

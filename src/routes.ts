@@ -13,10 +13,13 @@ routes.post('/auth/login', usuariosController.login);
 
 routes.use(autenticar);
 
+routes.post('/auth/refresh', usuariosController.refresh);
+
 routes.get('/usuarios', usuariosController.index);
 routes.get('/usuarios/:id', usuariosController.show);
 routes.post('/usuarios', usuariosController.store);
 routes.put('/usuarios/:id', usuariosController.update); 
+
 
 //routes.delete('/usuarios/:id', usuariosController.destroy); //sai
 

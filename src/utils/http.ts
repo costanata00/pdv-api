@@ -22,8 +22,8 @@ function jwtSecret(): string {
   return secret;
 }
 
-export function gerarToken(payload: TokenPayload): string {
-  return jwt.sign(payload, jwtSecret(), { expiresIn: '8h' });
+export function gerarToken(payload: TokenPayload, duration?: number): string {
+  return jwt.sign(payload, jwtSecret(), { expiresIn: duration ?? '2h' });
 }
 
 // pede header "Authorization: Bearer <token>"da erro se invalido ou expirado
