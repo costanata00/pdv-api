@@ -56,7 +56,18 @@ export function parseId(req: Request, res: Response, param = 'id'): number | nul
 
 
 
-
+// export function log((req, res, next) => {
+//   res.on('finish', () => {
+//     logs.create({
+//       nome_tabela: req.originalUrl.split('/')[1],
+//       coluna_pk: req.params.id ?? null,
+//       operacao: req.method,
+//       rota: req.originalUrl,
+//       status: res.statusCode,
+//     }).catch((err) => console.error('Falha ao gravar log:', err));
+//   });
+//   next();
+// });
 
 
 

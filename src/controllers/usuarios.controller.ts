@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 import { Request, Response } from 'express';
 import { usuarios } from '../models';
-import { gerarToken, parseId, pick } from '../utils/http';
+import { gerarToken, lerTokenVencido, parseId, pick } from '../utils/http';
 
 const campos = ['nome', 'email', 'senha', 'ativo'] as const;
 
@@ -83,8 +83,13 @@ export const usuariosController = {
     
   },
   async refresh(req: Request, res: Response) {
-    const { id, email } = req.usuario!;
-    res.json({ token: gerarToken({ id, email }, 7400) });
+    const dados = lerTokenVencido(req);
+    const usuario = dados ? await usuarios.findByPk(dados.id) : null;
+    if (!usuario || !usuario.ativo) {
+      res.status(401).json({ error: 'Token invalido, faca login de novo' });
+      return;
+    }
+    res.json({ token: gerarToken({ id: usuario.id, email: usuario.email }) });
   },
 
 };

@@ -10,10 +10,9 @@ import { vendasService } from './services/vendas.service';
 const routes = Router();
 
 routes.post('/auth/login', usuariosController.login);
+routes.post('/auth/refresh', usuariosController.refresh);
 
 routes.use(autenticar);
-
-routes.post('/auth/refresh', usuariosController.refresh);
 
 routes.get('/usuarios', usuariosController.index);
 routes.get('/usuarios/:id', usuariosController.show);
@@ -46,7 +45,7 @@ routes.post('/vendas', vendasController.store); //encaminha p service
 
 //routes.post('/vendas', vendasController.store);//service cuida
 routes.put('/vendas/:id', vendasController.update);
-routes.put('/vendas/:id/cancelar', vendasController.cancel); //fica pra cancelar
+routes.put('/vendas/:id/cancelar', vendasController.cancel);
 
 
 routes.get('/vendas/:id/itens', itensVendaController.indexByVenda);
