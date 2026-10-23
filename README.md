@@ -1,6 +1,8 @@
 precisa do banco Ponto_Sequelize já existir
 
-psql "postgresql://postgres:postgres@localhost:5433/Ponto_Sequelize" -f seed.sql
+psql "postgresql://postgres:postgres@localhost:5432/postgres" -c "CREATE DATABASE \"Ponto_Sequelize\";"
+
+psql "postgresql://postgres:postgres@localhost:5432/Ponto_Sequelize" -f seed.sql
 
 psql "DATABASE_URL" -f seed.sql
 

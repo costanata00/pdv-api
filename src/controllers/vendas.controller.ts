@@ -1,10 +1,8 @@
 import { Request, Response } from 'express';
 import { Op, WhereOptions } from 'sequelize';
 import { vendas } from '../models';
-import { parseId, pick } from '../utils/http';
+import { parseId } from '../utils/http';
 import { VendaError, vendasService } from '../services/vendas.service';
-
-const campos = ['cliente_id', 'usuario_id', 'valor_total', 'data_venda', 'status', 'pago', 'forma_pag'] as const;
 
 export const vendasController = {
   async index(req: Request, res: Response) {
@@ -19,8 +17,6 @@ export const vendasController = {
         ],
       });
     }
-    //if (status) Object.assign(where, { status });
-    //if (pago === 'true' || pago === 'false') Object.assign(where, { pago: pago === 'true' });
 
     res.json(
       await vendas.findAll({
@@ -66,28 +62,6 @@ export const vendasController = {
     }
   },
 
-  async update(req: Request, res: Response) {
-    const id = parseId(req, res);
-    if (id === null) return;
-    const venda = await vendas.findByPk(id);
-    if (!venda) {
-      res.status(404).json({ error: 'Venda nao encontrada' });
-      return;
-    }
-    await venda.update(pick(req.body, campos));
-    res.json(venda);
-  },
-
-  async destroy(req: Request, res: Response) {
-    const id = parseId(req, res);
-    if (id === null) return;
-    const apagados = await vendas.destroy({ where: { id } });
-    if (!apagados) {
-      res.status(404).json({ error: 'Venda nao encontrada' });
-      return;
-    }
-    res.status(204).end();
-  },
   async cancel(req: Request, res: Response) {
     const id = parseId(req, res);
     if (id === null) return;
@@ -99,6 +73,7 @@ export const vendasController = {
         console.log(res.status(err.status).json({ error: err.message }));
         return;
       }
+      throw err;
     }
   }
 };

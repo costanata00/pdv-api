@@ -23,7 +23,7 @@ export interface VendaInput {
 const inteiroPositivo = (v: unknown): v is number => Number.isInteger(v) && (v as number) > 0;
 const emCentavos = (valor: unknown) => Math.round(Number(valor) * 100);
 
-// Validar os dados recebidos
+// Valida o body da request
 function validar(body: any): VendaInput {
   if (!body || typeof body !== 'object') throw new VendaError('Corpo da requisicao invalido');
 
@@ -36,8 +36,6 @@ function validar(body: any): VendaInput {
   if (pago !== undefined && typeof pago !== 'boolean') throw new VendaError('pago deve ser true ou false');
 
   if (!Array.isArray(itens) || itens.length === 0) throw new VendaError('A venda precisa de pelo menos um item');
-
-  // Agrupa itens repetidos da mesma mercadoria somando as quantidades
   const agrupados = new Map<number, number>();
   for (const item of itens) {
     if (!inteiroPositivo(item?.mercadoria_id)) throw new VendaError('mercadoria_id invalido nos itens');
@@ -57,15 +55,14 @@ export const vendasService = {
   async criar(body: unknown, usuarioId: number) {
     const dados = validar(body);
 
-    // Começo da transação sql
+    // Começo da transação
     const vendaId = await sequelize.transaction(async (transaction) => {
       if (dados.cliente_id) {
         const cliente = await clientes.findByPk(dados.cliente_id, { transaction });
         if (!cliente || cliente.ativo === false) throw new VendaError('Cliente nao encontrado ou inativo', 404);
       }
 
-      //select for update: bloqueia as linhas encontradas ate o fim da transacao,
-      //evitando que outro usuario altere o estoque antes de atualizar
+      //select for update: bloqueia as linhas ate o fim da transacao,
       const ids = dados.itens.map((i) => i.mercadoria_id);
       const encontradas = await mercadorias.findAll({
         where: { id: { [Op.in]: ids } },
@@ -74,7 +71,7 @@ export const vendasService = {
       });
       const porId = new Map(encontradas.map((m) => [m.id, m]));
 
-      // Verificar estoque dos items e calcula os valores nas mercadorias
+      // Verifica estoque dos items e calcula os valores
       let totalCentavos = 0;
       const linhas = dados.itens.map(({ mercadoria_id, quantidade }) => {
         const mercadoria = porId.get(mercadoria_id);
