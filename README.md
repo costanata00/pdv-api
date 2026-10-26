@@ -11,8 +11,8 @@ Para testar:
 
 POST http://localhost:3000/login
 Content-Type: application/json
-
 { "email": "admin@loja.com", "senha": "admin123" }
+
 
 
 POST http://localhost:3000/usuarios
@@ -39,3 +39,5 @@ CREATE TABLE clientes ( id SERIAL PRIMARY KEY, nome VARCHAR(255) NOT NULL, cpf_c
 CREATE TABLE vendas ( id SERIAL PRIMARY KEY, cliente_id INT REFERENCES clientes(id) ON DELETE CASCADE, usuario_id INT REFERENCES usuarios(id) ON DELETE CASCADE, valor_total NUMERIC(10,2), data_venda TIMESTAMP DEFAULT CURRENT_TIMESTAMP, status VARCHAR(50), pago BOOLEAN DEFAULT FALSE, forma_pag VARCHAR(50) );
 
 CREATE TABLE itens_venda ( id SERIAL PRIMARY KEY, venda_id INT REFERENCES vendas(id) ON DELETE CASCADE, mercadoria_id INT REFERENCES mercadorias(id) ON DELETE CASCADE, quantidade INT, preco_unitario NUMERIC(10,2), valor_total NUMERIC(10,2) );
+
+ALTER TABLE public.mercadorias ADD COLUMN imagem_url VARCHAR(500)

@@ -8,10 +8,10 @@ import { autenticar } from './utils/http';
 const routes = Router();
 
 routes.post('/auth/login', usuariosController.login);
+routes.post('/auth/refresh', usuariosController.refresh);
 
 routes.use(autenticar);
 
-routes.post('/auth/refresh', usuariosController.refresh);
 routes.post('/usuarios', usuariosController.store);
 
 routes.get('/mercadorias', mercadoriasController.index);

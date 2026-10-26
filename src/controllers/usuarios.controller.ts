@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 import { Request, Response } from 'express';
 import { usuarios } from '../models';
-import { gerarToken, pick } from '../utils/http';
+import { gerarRefreshToken, gerarToken, lerRefreshToken, pick } from '../utils/http';
 
 const campos = ['nome', 'email', 'senha', 'ativo'] as const;
 
@@ -34,20 +34,26 @@ export const usuariosController = {
       res.status(401).json({ error: 'Email ou senha invalidos' });
       return;
     }
+    const dados = { id: usuario.id, email: usuario.email };
     res.json({
-      token: gerarToken({ id: usuario.id, email: usuario.email }),
+      token: gerarToken(dados),
+      refreshToken: gerarRefreshToken(dados),
       usuario: { id: usuario.id, nome: usuario.nome },
     });
-    
+
   },
   async refresh(req: Request, res: Response) {
-    const { id, email } = req.usuario!;
-    const usuario = await usuarios.findOne({ where: { id, email, ativo: true } });
+    const dados = lerRefreshToken(req.body?.refreshToken);
+    if (!dados) {
+      res.status(401).json({ error: 'Refresh token invalido ou expirado' });
+      return;
+    }
+    const usuario = await usuarios.findOne({ where: { id: dados.id, email: dados.email, ativo: true } });
     if (!usuario) {
       res.status(401).json({ error: 'Usuario nao encontrado ou inativo' });
       return;
     }
-    res.json({ token: gerarToken({ id, email }, 7200) });
+    res.json({ token: gerarToken(dados), refreshToken: gerarRefreshToken(dados) });
   },
 
 };

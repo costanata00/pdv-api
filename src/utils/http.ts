@@ -22,8 +22,19 @@ function jwtSecret(): string {
   return secret;
 }
 
-export function gerarToken(payload: TokenPayload, duration?: number): string {
-  return jwt.sign(payload, jwtSecret(), { expiresIn: duration ?? '2h' });
+export function gerarToken(payload: TokenPayload): string {
+  return jwt.sign({ ...payload, tipo: 'acesso' }, jwtSecret(), { expiresIn: '1m' });
+}
+
+export function gerarRefreshToken(payload: TokenPayload): string {
+  return jwt.sign({ ...payload, tipo: 'refresh' }, jwtSecret(), { expiresIn: '30d' });
+}
+
+// devolve o usuario do refresh token, ou null se for invalido/expirado/nao for refresh
+export function lerRefreshToken(token: unknown): TokenPayload | null {
+  if (typeof token !== 'string') return null;
+    const { id, email, tipo } = jwt.verify(token, jwtSecret()) as TokenPayload & { tipo?: string };
+    return tipo === 'refresh' ? { id, email } : null;
 }
 
 // pede header "Authorization: Bearer <token>"da erro se invalido ou expirado
@@ -34,7 +45,8 @@ export function autenticar(req: Request, res: Response, next: NextFunction) {
     return;
   }
   try {
-    const { id, email } = jwt.verify(token, jwtSecret()) as TokenPayload;
+    const { id, email, tipo } = jwt.verify(token, jwtSecret()) as TokenPayload & { tipo?: string };
+    if (tipo === 'refresh') throw new Error('refresh token nao vale como acesso');
     req.usuario = { id, email };
     next();
   } catch {

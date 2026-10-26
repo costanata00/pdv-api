@@ -9,11 +9,12 @@ export interface mercadoriasAttributes {
   preco?: number;
   estoque?: number;
   ativo?: boolean;
+  imagem_url?: string | null;
 }
 
 export type mercadoriasPk = "id";
 export type mercadoriasId = mercadorias[mercadoriasPk];
-export type mercadoriasOptionalAttributes = "id" | "preco" | "estoque" | "ativo";
+export type mercadoriasOptionalAttributes = "id" | "preco" | "estoque" | "ativo" | "imagem_url";
 export type mercadoriasCreationAttributes = Optional<mercadoriasAttributes, mercadoriasOptionalAttributes>;
 
 export class mercadorias extends Model<mercadoriasAttributes, mercadoriasCreationAttributes> implements mercadoriasAttributes {
@@ -23,6 +24,7 @@ export class mercadorias extends Model<mercadoriasAttributes, mercadoriasCreatio
   preco?: number;
   estoque?: number;
   ativo?: boolean;
+  imagem_url?: string | null;
 
   // mercadorias hasMany itens_venda via mercadoria_id
   itens_vendas!: itens_venda[];
@@ -67,8 +69,12 @@ export class mercadorias extends Model<mercadoriasAttributes, mercadoriasCreatio
       type: DataTypes.BOOLEAN,
       allowNull: true,
       defaultValue: true
-    }
-  }, {
+    },
+    imagem_url: {                                                                                                                                                                                                                     
+    type: DataTypes.STRING(500),                                                                                                                                                                                                    
+    allowNull: true                                                                                                                                                                                                                 
+  }  
+}, {
     sequelize,
     tableName: 'mercadorias',
     schema: 'public',

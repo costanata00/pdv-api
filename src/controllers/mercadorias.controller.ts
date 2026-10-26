@@ -3,7 +3,7 @@ import { Op } from 'sequelize';
 import { mercadorias } from '../models';
 import { parseId, pick } from '../utils/http';
 
-const campos = ['codigo', 'descricao', 'preco', 'estoque', 'ativo'] as const;
+const campos = ['codigo', 'descricao', 'preco', 'estoque', 'ativo', 'imagem_url'] as const;
 
 export const mercadoriasController = {
 
@@ -31,8 +31,8 @@ export const mercadoriasController = {
     res.json(mercadoria);
   },
   async deletarNoStock(req: Request, res: Response) {
-    const where = { estoque: { [Op.lt]: 1 }, ativo: false };
+    const where = { estoque: { [Op.lte]: 0 }, ativo: false };
     await mercadorias.destroy({ where });
-    res.json({ message: `mercadorias deletadas com estoque 0` });
+    res.json({ message: `Mercadorias deletadas com estoque 0` });
   } 
 };
