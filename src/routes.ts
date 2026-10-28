@@ -25,8 +25,10 @@ routes.post('/clientes', clientesController.store);
 routes.put('/clientes/:id', clientesController.update);
 
 routes.get('/vendas', vendasController.index);
+routes.get('/vendas/relatorio', vendasController.relatorio);
 routes.get('/vendas/:id', vendasController.show);
 routes.post('/vendas', vendasController.store);
 routes.put('/vendas/:id/cancelar', vendasController.cancel);
+
 
 export default routes;

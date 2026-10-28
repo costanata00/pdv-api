@@ -152,6 +152,27 @@ export const vendasService = {
       }
       await venda.update({ status: 'cancelada' }, { transaction });
     });
+  },
+  async gerarRelatorio(query: any) {
+    const where: any = {};
+    if (query.data_inicio) {
+      const inicio = new Date(query.data_inicio);
+      if (isNaN(inicio.getTime())) throw new VendaError('data_inicio invalida');
+      where.createdAt = { [Op.gte]: inicio };
+    }
+    if (query.data_fim) {
+      const fim = new Date(query.data_fim);
+      if (isNaN(fim.getTime())) throw new VendaError('data_fim invalida');
+      where.createdAt = { ...where.createdAt, [Op.lte]: fim };
+    }
+    return vendas.findAll({
+      where,
+      include: [
+        { association: 'cliente' },
+        { association: 'usuario', attributes: { exclude: ['senha'] } },
+        { association: 'itens_vendas', include: [{ association: 'mercadorium' }] },
+      ],
+      order: [['createdAt', 'DESC']],
+    });
   }
-
 };

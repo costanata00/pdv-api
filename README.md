@@ -17,7 +17,7 @@ Content-Type: application/json
 
 POST http://localhost:3000/usuarios
 Content-Type: application/json
-Authorization: Bearer <token retornado no login>
+Authorization: Bearer <token no login>
 
 {
   "nome": "Fulano de Tal",

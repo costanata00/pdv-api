@@ -24,7 +24,7 @@ export const vendasController = {
         include: [
           { association: 'cliente', attributes: ['nome'] },
           { association: 'usuario', attributes: ['nome'] },
-          
+          { association: 'itens_vendas', include: [{ association: 'mercadorium' }] },          
         ],
         order: [['id', 'ASC']],
       }),
@@ -71,6 +71,19 @@ export const vendasController = {
     } catch (err) {
       if (err instanceof VendaError) {
         console.log(res.status(err.status).json({ error: err.message }));
+        return;
+      }
+      throw err;
+    }
+  },
+
+  async relatorio(req: Request, res: Response) {
+    try {
+      const relatorio = await vendasService.gerarRelatorio(req.query);
+      res.json(relatorio);
+    } catch (err) {
+      if (err instanceof VendaError) {
+        res.status(err.status).json({ error: err.message });
         return;
       }
       throw err;

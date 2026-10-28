@@ -23,21 +23,24 @@ function jwtSecret(): string {
 }
 
 export function gerarToken(payload: TokenPayload): string {
-  return jwt.sign({ ...payload, tipo: 'acesso' }, jwtSecret(), { expiresIn: '1m' });
+  return jwt.sign({ ...payload, tipo: 'acesso' }, jwtSecret(), { expiresIn: '15m' });
 }
 
 export function gerarRefreshToken(payload: TokenPayload): string {
   return jwt.sign({ ...payload, tipo: 'refresh' }, jwtSecret(), { expiresIn: '30d' });
 }
 
-// devolve o usuario do refresh token, ou null se for invalido/expirado/nao for refresh
 export function lerRefreshToken(token: unknown): TokenPayload | null {
   if (typeof token !== 'string') return null;
+  try {
     const { id, email, tipo } = jwt.verify(token, jwtSecret()) as TokenPayload & { tipo?: string };
-    return tipo === 'refresh' ? { id, email } : null;
+    if (tipo !== 'refresh') return null;
+    return { id, email };
+  } catch {
+    return null;
+  }
 }
 
-// pede header "Authorization: Bearer <token>"da erro se invalido ou expirado
 export function autenticar(req: Request, res: Response, next: NextFunction) {
   const [tipo, token] = (req.headers.authorization ?? '').split(' ');
   if (tipo !== 'Bearer' || !token) {
@@ -54,7 +57,6 @@ export function autenticar(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-// valida o id do path.param e devolve como number
 export function parseId(req: Request, res: Response, param = 'id'): number | null {
   const id = Number(req.params[param]);
   if (!Number.isInteger(id) || id <= 0) {
@@ -84,8 +86,7 @@ export function parseId(req: Request, res: Response, param = 'id'): number | nul
 
 
 
-// Mantem so os campos permitidos que vieram no body (id fica de fora).
-// Os tipos sao validados pelo Sequelize/banco ao salvar.
+// Mantem so os campos permitidos que vieram no body.
 export function pick<K extends string>(body: unknown, keys: readonly K[]): Partial<Record<K, any>> {
   const src = (body ?? {}) as Record<string, unknown>;
   const out: Partial<Record<K, any>> = {};
