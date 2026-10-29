@@ -76,17 +76,4 @@ export const vendasController = {
       throw err;
     }
   },
-
-  async relatorio(req: Request, res: Response) {
-    try {
-      const relatorio = await vendasService.gerarRelatorio(req.query);
-      res.json(relatorio);
-    } catch (err) {
-      if (err instanceof VendaError) {
-        res.status(err.status).json({ error: err.message });
-        return;
-      }
-      throw err;
-    }
-  }
 };

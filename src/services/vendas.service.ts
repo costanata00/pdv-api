@@ -55,7 +55,7 @@ export const vendasService = {
   async criar(body: unknown, usuarioId: number) {
     const dados = validar(body);
 
-    // Começo da transação
+    // transação
     const vendaId = await sequelize.transaction(async (transaction) => {
       if (dados.cliente_id) {
         const cliente = await clientes.findByPk(dados.cliente_id, { transaction });
@@ -71,7 +71,7 @@ export const vendasService = {
       });
       const porId = new Map(encontradas.map((m) => [m.id, m]));
 
-      // Verifica estoque dos items e calcula os valores
+      // Verifica estoque e calcula valores
       let totalCentavos = 0;
       const linhas = dados.itens.map(({ mercadoria_id, quantidade }) => {
         const mercadoria = porId.get(mercadoria_id);
@@ -96,7 +96,7 @@ export const vendasService = {
         };
       });
 
-      // Criar a venda
+      // Cria a venda
       const venda = await vendas.create(
         {
           cliente_id: dados.cliente_id,
@@ -129,7 +129,7 @@ export const vendasService = {
       return venda.id;
     });
 
-    // envia a venda criada para o app
+    // envia a venda de volta 
     return vendas.findByPk(vendaId, {
       include: [
         { association: 'cliente' },
@@ -153,26 +153,4 @@ export const vendasService = {
       await venda.update({ status: 'cancelada' }, { transaction });
     });
   },
-  async gerarRelatorio(query: any) {
-    const where: any = {};
-    if (query.data_inicio) {
-      const inicio = new Date(query.data_inicio);
-      if (isNaN(inicio.getTime())) throw new VendaError('data_inicio invalida');
-      where.createdAt = { [Op.gte]: inicio };
-    }
-    if (query.data_fim) {
-      const fim = new Date(query.data_fim);
-      if (isNaN(fim.getTime())) throw new VendaError('data_fim invalida');
-      where.createdAt = { ...where.createdAt, [Op.lte]: fim };
-    }
-    return vendas.findAll({
-      where,
-      include: [
-        { association: 'cliente' },
-        { association: 'usuario', attributes: { exclude: ['senha'] } },
-        { association: 'itens_vendas', include: [{ association: 'mercadorium' }] },
-      ],
-      order: [['createdAt', 'DESC']],
-    });
-  }
 };
