@@ -9,7 +9,7 @@ psql "DATABASE_URL" -f seed.sql
 Para testar:
 
 
-POST http://localhost:3000/login
+POST http://localhost:3000/auth/login
 Content-Type: application/json
 { "email": "admin@loja.com", "senha": "admin123" }
 

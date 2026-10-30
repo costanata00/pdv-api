@@ -125,7 +125,7 @@ export const vendasService = {
       for (const l of linhas) {
         await l.mercadoria.decrement('estoque', { by: l.quantidade, transaction });
       }
-      //  acabou a transacao
+      //  acabou a transacao, sequelize da commit sozinho
       return venda.id;
     
     });
