@@ -70,7 +70,7 @@ export const vendasController = {
       res.status(204).end();
     } catch (err) {
       if (err instanceof VendaError) {
-        console.log(res.status(err.status).json({ error: err.message }));
+        res.status(err.status).json({ error: err.message });
         return;
       }
       throw err;

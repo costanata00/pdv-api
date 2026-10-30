@@ -62,7 +62,7 @@ export const vendasService = {
         if (!cliente || cliente.ativo === false) throw new VendaError('Cliente nao encontrado ou inativo', 404);
       }
 
-      //select for update: bloqueia as linhas ate o fim da transacao,
+      //select for update:
       const ids = dados.itens.map((i) => i.mercadoria_id);
       const encontradas = await mercadorias.findAll({
         where: { id: { [Op.in]: ids } },
@@ -71,7 +71,7 @@ export const vendasService = {
       });
       const porId = new Map(encontradas.map((m) => [m.id, m]));
 
-      // Verifica estoque e calcula valores
+      // Verifica estoque e recalcula valores
       let totalCentavos = 0;
       const linhas = dados.itens.map(({ mercadoria_id, quantidade }) => {
         const mercadoria = porId.get(mercadoria_id);
@@ -96,7 +96,7 @@ export const vendasService = {
         };
       });
 
-      // Cria a venda
+      //  Cria a venda
       const venda = await vendas.create(
         {
           cliente_id: dados.cliente_id,
@@ -109,7 +109,7 @@ export const vendasService = {
         { transaction },
       );
 
-      // Cria os itens da venda
+      //  Cria cada item da venda
       await itens_venda.bulkCreate(
         linhas.map((l) => ({
           venda_id: venda.id,
@@ -121,15 +121,16 @@ export const vendasService = {
         { transaction },
       );
 
-      // atualiza o estoque
+      //  atualiza o estoque
       for (const l of linhas) {
         await l.mercadoria.decrement('estoque', { by: l.quantidade, transaction });
       }
-
+      //  acabou a transacao
       return venda.id;
+    
     });
 
-    // envia a venda de volta 
+    //  envia a venda de volta 
     return vendas.findByPk(vendaId, {
       include: [
         { association: 'cliente' },

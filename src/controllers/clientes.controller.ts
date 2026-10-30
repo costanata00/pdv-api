@@ -12,10 +12,10 @@ export const clientesController = {
       typeof req.query.busca === "string" ? req.query.busca.trim() : "";
     const where = busca
       ? {
-          [Op.or]: ["nome", "cpf_cnpj", "telefone", "email"].map((campo) => ({
-            [campo]: { [Op.iLike]: `%${busca}%` },
-          })),
-        }
+        [Op.or]: ["nome", "cpf_cnpj", "telefone", "email"].map((campo) => ({
+          [campo]: { [Op.iLike]: `%${busca}%` },
+        })),
+      }
       : {};
     res.json(await clientes.findAll({ where, order: [["id", "ASC"]] }));
   },
@@ -84,6 +84,9 @@ function validateCNPJ(cnpj: string): boolean {
   const dv1Received = parseInt(clean[12], 10);
   const dv2Received = parseInt(clean[13], 10);
   if (isNaN(dv1Received) || isNaN(dv2Received)) return false;
+
+  const allSame = clean.split('').every(char => char === clean[0]);
+  if (allSame) return false;
 
   const weightsDv1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
   const weightsDv2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
